@@ -1,5 +1,6 @@
 ---
 title: "HW1: R Basics"
+Dariana Guzman
 ---
 
 ## Getting Started with R
