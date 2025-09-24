@@ -1,0 +1,142 @@
+---
+title: "Data Distribution, Volleyball Percentiles, Car Thefts, "
+author: "Derek Willis /Rob Wells"
+date: 09-23-2025
+---
+
+This workbook contains three exercises for our class. Complete them and hand it in at the end of class via a GitHub link.
+
+Your name:
+Dariana Guzman
+
+#------------------------------------------------------------------------------#
+
+
+# Part 1: When Data Isn't Normal
+
+Working in pairs, consider the following question: "Why do many statistical methods assume a normal distribution, and what challenges arise when data does not meet this assumption?"
+
+First, come up with two examples of data that might not be normally distributed - in other words, that could be skewed or unequal in some way - and explain why they wouldn't be normally distributed. Feel free to draw what you think the distribution would look like.
+
+Then, how should a reporter working on a story about data that isn't normally distributed describe that data? Which statistical measures that we've covered in class should they use or avoid when doing so? Use the examples you came up with, and you should discuss your answers together, but each student submits separately.
+
+**Your answer**:
+
+Example 1: Commute times to school 
+Most people that commute live fairly near the university -- their time spent commuting usually range from 15 mins to an hour max. There is a smaller group, however, that have longer commutes and come from a long distance. They end up driving for more than an hour  or sometimes two with traffic. That makes data right skewed. I think it'll draw a picture of a tall peak in the shorter times with a curve stretching out to the right for longer commutes. 
+
+Example 2: The amount of children per household
+A lot of households have 0-2 children, while fewer have 3 or more. This can clump the data to the lower end and trail off. The distribution is positively skewed much like the prev. example. This could visually look like there is a steep drop after 0-2 kids with a few scattered points way out with 3 or more children.
+
+
+When data isn't distributed normally, reporters need to be mindful and avoid presenting only the mean/average since it can be distorted by extreme values/outliers. They should (or we in this case) should use the median instead as it's the middle value that better represents what is typical when the data is skewed. We can also point out outliers when there are any. 
+With the previous examples, while speaking about the commute times -- instead of saying that the average commute is a certain amount of minutes, for example, "the average commute is 47 minutes", which can be skewed by a small group of very long commutes, a reporter could write: “The median commute is 30 minutes, but about 15% of workers spend more than an hour getting to their jobs.” With children per household, a better way to say things is, “Most households have either one or two children, while only 7% have four or more.” instead of stating a mean like, 2.3 chidlren per home. 
+
+#------------------------------------------------------------------------------#
+
+
+# Part 2: Volleyball Percentiles
+
+We'll be calculating percentiles to see how good Maryland was in service aces in the 2024 season. We'll use `mutate()` and a new function `ntile()` to calculate percentiles. Get started by loading the tidyverse in a code block, then load the CSV file here: https://raw.githubusercontent.com/dwillis/NCAAWomensVolleyballData/refs/heads/main/data/ncaa_womens_volleyball_matchstats_2024.csv" and save it to a dataframe called `matches`.
+
+### Task 1: Load the tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+### Task 2: Load the data
+
+```{r}
+matches <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensVolleyballData/refs/heads/main/data/ncaa_womens_volleyball_matchstats_2024.csv")
+```
+
+### Task 3: Create totals of aces for each team using `group_by()` and `summarize()`
+
+```{r}
+team_aces <- matches |> 
+  group_by(team) |> 
+  summarize(total_aces = sum(aces)) |> 
+  arrange(desc(total_aces))
+```
+
+
+### Task 4: Calculate percentiles using `mutate()` and `ntile()`
+
+```{r}
+team_aces |> mutate(percentile = ntile(total_aces, 100))
+```
+
+
+### Task 5: Describe the percentiles
+
+Write a couple of sentences that puts Maryland into context with the other teams in the dataset. You can do some Internet research to help with this.
+
+**Answer**:
+Maryland finished the season with 223 total team aces and ranking 17th nationally in this statistic. This put them ahead of schools like LSU, Purdue, and Illinois -- who all had fewer aces in the dataset. Across the season, Maryland played 33 matches, winning 18 and losing 15, scoring a total of 1,730 points while allowing 1,635 points. Their hit percentage varied widely, from a high of 0.500 against Alabama A&M to a low of 0.043 against Wisconsin, showing good offensive performances in some matches but struggles against top ranked opponents. Meanwhile, on a defensive pov -- Maryland recorded 162 defensive kills and 76 defensive aces, ranking them in the upper tier of teams. However the inconsistencies against higher competition like Michigan, Nebraska, and Penn State indicate that there are areas for improvement.
+#------------------------------------------------------------------------------#
+
+# Part 3: Car Thefts
+
+Follow along with the demo to learn how to calculate standard deviation and how to create a histogram of the data using R and the Tidyverse. Get started by loading the tidyverse in a new R block.
+
+### Task 1: Load the tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+
+### Task 2: Load the car thefts dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/car_thefts_jan24.csv
+
+
+```{r}
+car_thefts <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/car_thefts_jan24.csv")
+```
+
+### Task 3: Calculate the standard deviation of the number of car thefts, along with the mean
+
+```{r}
+car_thefts |> summarize(mean = mean(count), sd = sd(count))
+```
+
+
+### Task 4: Create a histogram of the number of car thefts
+
+
+```{r}
+car_thefts |> 
+  ggplot() + 
+  geom_histogram(aes(x = count), binwidth = 2)
+```
+
+
+
+
+### Task 5: Add a line to the histogram that shows the mean of the number of car thefts, and two other lines to show one standard deviation in both directions
+
+```{r}
+car_thefts |> 
+  ggplot() + 
+  geom_histogram(aes(x = count), binwidth = 2) +
+  geom_vline(aes(xintercept = mean(count)), color = "red", linetype = "dashed", size = 1) +
+  geom_vline(aes(xintercept = mean(count) - sd(count)), color = "blue", linetype = "dashed", size = 1) +
+  geom_vline(aes(xintercept = mean(count) + sd(count)), color = "blue", linetype = "dashed", size = 1)
+```
+
+### Task 6: Describe your results
+
+Is the distribution normal or skewed in one direction? Write a sentence in which you describe the range of the data covered by one standard deviation from the mean on both sides - how much of the data falls in that range?
+
+
+**Answer**:
+The distribution of car thefts is slightly right skewed with a few higher counts such as 18 and 20 thefts, stretching the tail to the right. 
+
+The mean number of thefts per day was about 12.7, and the standard deviation was about 4.3.This means that one standard deviation from the mean spans roughly 8 to 17 thefts per day. 
+
+
+When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
+
+Congrats!
+
+
