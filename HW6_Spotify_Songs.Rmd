@@ -1,0 +1,94 @@
+---
+title: "HW6_Spotify_Songs"
+Name: Darina Guzman
+---
+
+In this assignment, you will be working with a dataset of songs played on Spotify in 2020, and you'll be writing code to explore the range of danceability scores in the data, using standard deviation and histograms. You'll also write up your findings.
+
+### Task 1: Load the tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+### Task 2: Load the Spotify Songs dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/spotify_2020.csv
+
+```{r}
+read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/spotify_2020.csv")
+```
+
+### Task 3: Calculate the mean and standard deviation of the danceability scores
+
+Write code to calculate the mean and standard deviation of the danceability scores in the Spotify dataset. Display those.
+
+```{r}
+spotify <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/spotify_2020.csv") 
+
+spotify %>%
+  summarise(
+    mean_danceability = mean(danceability, na.rm = TRUE),
+    sd_danceability   = sd(danceability, na.rm = TRUE)
+  )
+
+```
+
+### Task 4: Create a histogram of the danceability scores
+
+Write code to create a histogram of the danceability scores in the Spotify dataset, based on the example we did in class.
+
+```{r}
+ggplot(spotify, aes(x = danceability)) +
+  geom_histogram(binwidth = 0.05, fill = "red", color = "blue") +labs(title = "Histogram of Danceability Scores (Spotify 2020)",
+       x = "Danceability",
+       y = "Count")
+  
+```
+
+### Task 5: Add a line to the histogram for the mean danceability score
+
+Take the same code and add a vertical line to the histogram for the mean danceability score, based on the example in class.
+
+```{r}
+spotify |> 
+  ggplot() + 
+  geom_histogram(aes(x = danceability), binwidth = 0.05, fill = "green", color = "black") +
+  geom_vline(aes(xintercept = mean(danceability, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", size = 1) +
+  labs(title = "Histogram of Danceability Scores (Spotify 2020)",
+       x = "Danceability",
+       y = "Count")
+```
+
+
+### Task 6: Add two lines to the histogram to show one standard deviation
+
+Take the previous code and add two lines to the histogram for the 1st standard deviation below and above the mean score.
+
+```{r}
+spotify |> 
+  ggplot() + 
+  geom_histogram(aes(x = danceability), binwidth = 0.05, fill = "green", color = "black") +
+  geom_vline(aes(xintercept = mean(danceability, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", size = 1) +
+  geom_vline(aes(xintercept = mean(danceability, na.rm = TRUE) - sd(danceability, na.rm = TRUE)), 
+             color = "blue", linetype = "dashed", size = 1) +
+  geom_vline(aes(xintercept = mean(danceability, na.rm = TRUE) + sd(danceability, na.rm = TRUE)), 
+             color = "blue", linetype = "dashed", size = 1) +
+  labs(title = "Histogram of Danceability Scores (Spotify 2020)",
+       x = "Danceability",
+       y = "Count")
+```
+
+### Task 7: Describe our results and pitch a story
+
+Write a few sentences about the distribution of danceability scores in the Spotify dataset. Is it a normal distribution, or is it skewed in one direction? What does the mean and one standard distribution tell us about the songs in the dataset? Draft a short story pitch from this data.
+
+The distribution of dancebility scores in the Spotify dataset is not really normal. The graph it skewed to the left with a higher concentration of songs in the mid to high range of dancebility. The mean falls a bit above the middle of the scale which canshow that most songs lean toward being danceable. The standard deviation can tell us that while some tracks are slower the majority are within the more danceble section of the mean. 
+
+During a period of time where most of the world was living through a world wide lockdown -- Spotify listeners leaned towards listening to music that was more uplifting and energetic. The years more populat tracks show that dancibility defined the mainstream music. The data suggests that artists and audiences leaned to music that could make the year a bit better and keep it positive. 
+
+
+
+### Task 8: Save Your Work and Put it on GitHub
+
+Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
