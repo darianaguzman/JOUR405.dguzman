@@ -1,0 +1,92 @@
+---
+title: "HW7_MandMs"
+date: 10/1/2025
+---
+
+
+In this assignment, you'll be picking up where you left off with the M&Ms activity. You'll load the data and perform some basic statistical analysis. Follow the steps below to complete the assignment.
+
+### Task 1: Load the tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+
+### Task 2: Load an M&Ms dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/mandms.csv
+```{r}
+mandms <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/mandms.csv")
+```
+
+
+### Task 3: Sample 5 rows of data from the dataset, and then sample 10 rows, saving each to separate dataframes called sample5 and sample10. Be sure to use set.seed(1234) before you start.
+```{r}
+set.seed(1234)
+sample5 <-mandms [sample(nrow(mandms), 5),]
+sample10 <- mandms [sample(nrow(mandms), 10),]
+```
+
+
+### Task 4: Calculate the mean, median and standard deviation of red M&Ms from each of the samples.
+```{r}
+mean_red_5 <- mean(sample5$red)
+median_red_5 <- median(sample5$red)
+sd_red_5 <- sd(sample5$red)
+
+mean_red_10 <- mean(sample10$red)
+median_red_10 <- median(sample10$red)
+sd_red_10 <- sd(sample10$red)
+```
+
+
+### Task 5: Calculate the mean, median and standard deviation of red M&Ms from the population
+
+```{r}
+mean_red_pop <- mean(mandms$red)
+median_red_pop <- median(mandms$red)
+sd_red_pop <- sd(mandms$red)
+```
+
+### Task 6: Make three histograms: one each for sample5, sample10 and the original dataset. Include a headline. Use a consistent binwidth.
+
+```{r}
+binwidth_val <- 2
+
+ggplot(sample5, aes(x = red)) +
+  geom_histogram(binwidth = binwidth_val, fill = "red", color = "black") +
+  labs(
+    title = "Red M&Ms (Sample of 5)",
+    x = "Number of Red M&Ms",
+    y = "Count"
+  )
+
+ggplot(sample10, aes(x = red)) +
+  geom_histogram(binwidth = binwidth_val, fill = "red", color = "black") +
+  labs(
+    title = "Red M&Ms (Sample of 10)",
+    x = "Number of Red M&Ms",
+    y = "Count"
+  )
+```
+
+
+### Task 7: Answer questions
+
+
+Compare the three sets of means, standard deviations and histograms. Which are more helpful to you in understanding the accuracy of the samples?
+
+The sample of five rows had a mean of 73.8, a median of 75, and a standard deviation of 14.92, which is a bit different from the population values. The sample of ten was closer, with a mean of 74.7, a median of 72.5, and a standard deviation of 10.35, making its numbers more similar to the population. The population itself has a mean of 72.98, a median of 72, and a standard deviation of 16.46, which shows the actual distribution of red M&Ms. When comparing all three, the population statistics are the most accurate, and the larger sample is much more helpful than the smaller one -- showing that bigger samples generally give better estimates.
+
+What does this exercise tell you about the relationship between sample size and estimate accuracy?
+
+The exercise tells us that the larger sample sizes usually give more acurate representations of the population. The sample of 5 had numbers that were farther from the population while the sample of 10 was closer. This happens because bigger samples reduce the effect of unusual values, so the mean median and standard deviation are more likely to match the true pop. 
+
+How does random sampling introduce variation into statistical estimates?
+
+It introduces variation since every time you pick a sample, you can get different rows from the population. This means the mean, media, and sd can change from sample to sample. The differences happen just by chance even if the samples are the same size, which is why samples can sometimes give numbers that are far from the population.
+
+If you repeated this process, would the samples always be identical? Why or why not?
+
+No, the samples won't always be identical since random sampling picks different rows every time. Each new sample can have different values, so the mean median and sd can change. The only way to have the same sample again is by setting the same random sed before sampling. If not, then they'll always be slightly different. That's why variation should always be taken into account. 
+
+When finished, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
