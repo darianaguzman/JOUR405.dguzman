@@ -1,0 +1,200 @@
+# JOUR405: Statistics for Journalists
+## Makeup Midterm Exam - Fall 2025
+
+Name: Dariana Guzman
+
+
+# JOUR405: Statistics for Journalists
+## Midterm Exam - Fall 2025
+
+For this exam, you'll analyze several datasets using R and the statistical concepts we've covered in class. Load the tidyverse before beginning, then complete each task. Write your code in the provided blocks and answer the questions in complete sentences.
+
+# Load tidyverse and janitor
+```{r}
+#your code here
+library(tidyverse)
+library(janitor)
+
+```
+
+## Part 1: Restaurant Health Inspections (40 points)
+
+The first dataset contains restaurant health inspection scores from New York state. Load the data from: `https://raw.githubusercontent.com/profrobwells/Guest_Lectures/refs/heads/master/new_york_food_inspection_2025.csv`
+
+The dataset includes the name of the facility, the number of points for critical and non-critical violations.
+
+## Task 1: Load the data and clean the column names**
+```{r}
+total_number_critical_violations <- read_csv("https://raw.githubusercontent.com/profrobwells/Guest_Lectures/refs/heads/master/new_york_food_inspection_2025.csv")
+
+total_number_critical_violations <- total_number_critical_violations %>%
+  janitor::clean_names()
+```
+
+
+## Task 2: Calculate the mean and standard deviation maximum and minimum of the total critical violation scores. Put the results in a new dataframe called "compliance_stats." 
+```{r}
+compliance_stats <- total_number_critical_violations %>%
+  
+  summarize(
+    mean_critical = mean(total_number_critical_violations, na.rm = TRUE),
+    sd_critical = sd(total_number_critical_violations, na.rm = TRUE),
+    max_critical = max(total_number_critical_violations, na.rm = TRUE),
+    min_critical = min(total_number_critical_violations, na.rm = TRUE)
+  )
+
+```
+
+# Task 3: Write a two sentence summary describing the results from the analysis of New York State restaurant inspections
+
+**Write answer here**:
+
+The analysis of the New York State restaurant inspections led to a mean of 0.21 and sd of 0.66 -- with a min of 0 and max of 12. This means that the average number of critical violations per establishment was low. While most restaurants had very few -- little to no -- critical violations, some had as many as 12 -- showing htat some have serious health code issues... but these are quite uncommon. 
+
+##Task 4: Filter the dataset to just the restaurants with a critical violation. Then group by city and calculate the cities that have restaurants with the most violations
+
+```{r}
+
+violations_by_city <- total_number_critical_violations %>%
+  filter(total_number_critical_violations > 0) %>% 
+
+  group_by(city) %>%
+  summarise(total_violations = sum(total_number_critical_violations, na.rm = TRUE),
+            restaurant_count = n()) %>%
+  arrange(desc(total_violations))
+
+head(violations_by_city, 10)
+
+
+```
+
+## Task 5: Using the "inspections" dataset, create a histogram of the compliance scores with a vertical line showing the mean.  Include a headline and label the x and y axes.
+```{r}
+
+colnames(total_number_critical_violations)
+
+ggplot
+
+ggplot(total_number_critical_violations, aes(x = total_number_critical_violations)) +
+  geom_histogram(binwidth = 1, fill = "red", color = "blue") +
+  geom_vline(aes(xintercept = mean(total_number_critical_violations, na.rm = TRUE)),
+             color = "black", linetype = "dashed", size = 1) +
+  labs(
+    title = "Distribution of Restaurant Compliance Scores in NY",
+    x = "Compliance Score",
+    y = "Number of Restaurants"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+## Task 6: Write 2-3 sentences interpreting what the standard deviation and histogram tell us about the distribution of compliance scores. What would be newsworthy about this distribution? What's the story here? 
+
+**Write your answer here:**
+
+The histogram shows that most NY restaurants have high compliance scores -- only a small number performing poorly. The small standard deviation shows that compliance scores don’t really show much variance, most restaurants meet similar health standards. What's newsworthy takeaway is that while the state’s restaurant industry generally maintains strong compliance, there are a few outliers with very low scores that could point to potential health or inspection oversight issues worth investigating.
+
+## Part 2: Public Transit Ridership (40 points)
+
+You are investigating public transit ridership in the Washington, D.C. area and want to understand the patterns of daily bus and rail ridership. The dataset contains daily bus and rail ridership totals from WMATA for the past year. Load the data from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/wmata_daily.csv and do the following:
+
+# Task 7: Load the data into a dataframe called "transit"
+
+```{r}
+
+transit <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/wmata_daily.csv")
+
+```
+
+
+
+# Task 8: Calculate the average bus and rail ridership and standard deviation using summarize() 
+```{r}
+transit %>%
+  
+summarize(
+  mean_bus = mean(bus, na.rm = TRUE),
+  sd_bus = sd(bus, na.rm = TRUE),
+  mean_rail = mean(rail,na.rm = TRUE),
+  sd_rail = sd(rail, na.rm = TRUE)
+)
+
+```
+
+# Task 9: Take a random sample daily ridership numbers. The number in the sample is up to you, but explain why you chose what you did. 
+```{r}
+
+set.seed(100)
+sample_transit <- transit %>%
+  sample_n(40)
+
+```
+
+
+# Task 10: Using your random sample, calculate the means and deviations for bus and rail
+```{r}
+
+sample_transit %>%
+  summarize(
+    mean_bus = mean(bus, na.rm = TRUE),
+    sd_bus = sd(bus, na.rm = TRUE),
+    mean_rail = mean(rail, na.rm = TRUE),
+    sd_rail = sd(rail, na.rm = TRUE)
+  )
+
+```
+
+
+# Task 11: Compare your sample to the statistics for the full transit dataset. Write 2-3 sentences here comparing the two. **Write answer here:**
+
+The sample’s average daily bus ridership with an estimate of 313727.5	 and rail ridership with an estimate of 328228.5 are  close to the overall means from the full dataset. This can suggest the 40 day sample reflects ridership patterns well. 
+
+The smaller (slightly) standard deviations in the sample can show somewhat less variation compared to the full dataset, which can be because fewer extreme ridership days were included. The sample provides a reasonable but slightly smoother snapshot of Washington, DC’s typical transit use.
+
+# Task 12: Using the transit dataset, use group_by() and summarize(), calculate the means for bus and rail ridership for each weekday. 
+
+
+```{r}
+
+transit %>%
+  group_by(weekday) %>%
+  summarize(
+    mean_bus = mean(bus, na.rm = TRUE),
+    mean_rail = mean(rail, na.rm = TRUE)
+  ) %>%
+  arrange(match(weekday, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")))
+
+```
+
+
+# Task 13: Describe the overall pattern of ridership for bus and rail - which days stand out and why? Are there differences between bus and rail in the standard deviation values? **Write your answer here:**
+
+The pattern of ridership show that both bus and rail ridership are highest on weekdays, especially Tuesday through Thursday, which can reflect typical commuter travel patterns.
+
+Ridership tends to drop on weekends, with Sunday showing the lowest numbers. Thi can be because fewer people commute to work or school. 
+
+Rail tends to show a larger standard deviation than bus, which can suggest that rail use can fluctuate more from day to day, probabbly due to rail ridership being more sensitive to work schedules and other events while bus ridership remains steadier across the week.
+
+# Part 3: Essay Question (20 points)
+
+#Task 14: Data Analysis Scenario. You receive a tip that local emergency response times have gotten significantly worse over the past year. You obtain monthly data on response times for police, fire and ambulance calls.
+
+Write 3-4 sentences (no code!) explaining:
+1. What statistical measures would you calculate to verify this claim? 
+2. What visualizations would help readers understand the trends? 
+3. What additional context or data would you need to make this a complete story? 
+
+**Write your answer here:**
+
+To verify the claim, I would try and calculate the mean, median, and standard deviation when it comes to response times. This can ensure measures on how consistant those times are across the entire year. I could then create graphs, around line graphs that can show trends -- monthy-- for police, fire, and ambulance response times. I could organize it to make it make sense for viewers through the use of colors or lines. To give readers full context, I’d want data on call volume, staffing levels, budget changes and others. As well as any policy or procedural shifts that could explain increases or delays in response times. This additional information would help determine whether the slower responses reflect systemic problems or short-term fluctuations.
+
+
+### Submission Instructions
+- Save your work frequently
+- Make sure all code blocks run without errors
+- Provide clear explanations for your analytical choices
+- Before submitting, clear your environment and run the entire notebook
+
+Good luck!
