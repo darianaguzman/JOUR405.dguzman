@@ -205,6 +205,6 @@ The Tukey test and the confidence interval chart both show that there are signif
 Car thefts remain elevated after 2023 spike in Prince George’s County
 
 **Lede:**
-After a dramatic surge in 2023, car theft rates in Prince George’s County have not returned to pre-spike levels. The average theft rate remains about 20 per 100,000 residents higher than before the spike, confirming a lasting increase in car theft activity.
+After a spike in 2023, car theft rates in Prince George’s County have not returned to pre-spike levels. The average theft rate remains about 20 per 100,000 residents higher than before the spike, confirming a lasting increase in car theft activity.
 
 
