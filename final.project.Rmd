@@ -1,0 +1,92 @@
+---
+title: "Final Project"
+output: html_document
+DARIANA GUZMAN
+---
+
+For this project, I am using the College Scorecard dataset. It is a large dataset from the U.S. Department of Education. It includes information about colleges such as tuition, test scores, graduation rates, and student earnings. I am focusing on tuition costs at colleges in Maryland and Virginia.
+
+---
+#Where the data comes from?#
+
+The data comes from the College Scorecard, which is public information from the federal government.
+
+This project uses the US College Scorecard dataset, accessed through the `collegeScorecard` R package.
+
+Main website: https://collegescorecard.ed.gov/data
+R package used: collegeScorecard
+Package info: https://raw.githubusercontent.com/wellsdata/Jour405_student_repo_fall_2025/refs/heads/main/project/college_scorecard_2021_2024.csv
+
+The package gives me two datasets:
+
+school – information about each college (name, state, type of school, etc)
+scorecard – information for each college for every year (tuition, average costs, test scores, etc)
+
+---
+```{r}
+library(tidyverse)
+
+college_data <- read_csv("https://raw.githubusercontent.com/wellsdata/Jour405_student_repo_fall_2025/refs/heads/main/project/college_scorecard_2021_2024.csv")
+
+glimpse(college_data)
+```
+
+
+
+#What does the data contain?#
+
+The dataset includes things like:
+
+in-state tuition, out-of-state tuition, in and out of state enrollment
+
+The data covers 3 school years from 2021-2024, because each school appears once per academic year.
+
+#Most important?#
+
+Since I am studying college tuition in Maryland and Virginia, the most important columns are:
+	
+institution - the school’s name
+state - needed to filter for MD and VA
+xxxxtuitionfee_in - year in-state tuition
+xxxxtuitionfee_out -year  out-of-state tuition
+xxxxundergrad_enrollment - year undergrad enrollment amount
+
+#Whats missing?#
+
+The dataset does not include inflation adjustments and some years have missing tuition values. The data also does not include details like major/program tuition and it doesn’t explain why tuition goes up or down.
+
+```{r}
+college_data %>%
+  summarize(
+    mean_in = mean(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    median_in = median(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    min_in = min(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    max_in = max(`2021_22_tuitionfee_in`, na.rm = TRUE)
+  )
+```	
+
+#Hypotheses#
+
+1. Maryland colleges may cost less on average than Virginia colleges.
+2. Public colleges in both states might be raising tuition faster than private colleges.
+3. The gap between in-state and out-of-state tuition might be growing over time.
+
+#Questions hopefully i can answer throughout the project?#
+
+Are tuition increases steady, or do they spike in certain years?
+
+Do Maryland and Virginia follow the same trend, or are they different?
+
+Do private schools raise tuition more often? Compare that to public schools?
+
+Should I adjust tuition for inflation?
+
+#Other Questions?#
+
+How do I know if something I find is actually “newsworthy”?
+
+How can I tell if my hypothesis is realistic or if I need to change it?
+
+Should I use additional data?
+
+
