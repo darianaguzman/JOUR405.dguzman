@@ -67,17 +67,23 @@ college_data %>%
 
 #Hypotheses#
 
-1. Maryland colleges may cost less on average than Virginia colleges.
-2. Public colleges in both states might be raising tuition faster than private colleges.
-3. The gap between in-state and out-of-state tuition might be growing over time.
+Hypothesis 1 - MD vs VA tuition - In state:
+
+Null: The mean in-state tuition at Maryland colleges is equal to the mean in-state tuition at Virginia colleges.
+
+Alt: The mean in-state tuition at Maryland colleges is different from the mean in-state tuition at Virginia colleges.
+
+Hypothesis 2 - MD vs VA tuition - Out of State:
+
+Null: The mean out-of-state tuition at Maryland colleges is equal to the mean out-of-state tuition at Virginia colleges.
+
+Alt: The mean out-of-state tuition at Maryland colleges is different from the mean out-of-state tuition at Virginia colleges.
 
 #Questions hopefully i can answer throughout the project?#
 
 Are tuition increases steady, or do they spike in certain years?
 
 Do Maryland and Virginia follow the same trend, or are they different?
-
-Do private schools raise tuition more often? Compare that to public schools?
 
 Should I adjust tuition for inflation?
 
@@ -90,3 +96,226 @@ How can I tell if my hypothesis is realistic or if I need to change it?
 Should I use additional data?
 
 
+```{r}
+md_va_colleges <- college_data %>%
+  filter(state %in% c("MD", "VA")) %>%
+  select(institution, state, 
+         `2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  drop_na(`2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  mutate(
+    tuition_change = `2022_23_tuitionfee_in` - `2021_22_tuitionfee_in`
+  )
+
+md_va_colleges_out <- college_data %>%
+  filter(state %in% c("MD", "VA")) %>%
+  select(institution, state, 
+         `2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  drop_na(`2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  mutate(
+    tuition_change_out = `2022_23_tuitionfee_out` - `2021_22_tuitionfee_out`
+  )
+```
+
+T-test - In state
+```{r}
+tuition_md_21 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2021_22_tuitionfee_in`)
+tuition_va_21 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2021_22_tuitionfee_in`)
+t_test_21 <- t.test(tuition_md_21, tuition_va_21)
+
+tuition_md_22 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2022_23_tuitionfee_in`)
+tuition_va_22 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2022_23_tuitionfee_in`)
+t_test_22 <- t.test(tuition_md_22, tuition_va_22)
+
+tuition_md_23 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2023_24_tuitionfee_in`)
+tuition_va_23 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2023_24_tuitionfee_in`)
+t_test_23 <- t.test(tuition_md_23, tuition_va_23)
+```	
+
+All p-values are much greater than 0.05, which means we fail to reject the null hypothesis for all three years.
+
+The average in-state tuition in Maryland and Virginia colleges is about the same for 2021–22, 2022–23, and 2023–24.
+
+There is no statistically significant difference in tuition between the two states in any year.
+
+
+T Test - out of state
+```{r}
+tuition_md_21_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2021_22_tuitionfee_out`)
+tuition_va_21_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2021_22_tuitionfee_out`)
+t_test_21_out <- t.test(tuition_md_21_out, tuition_va_21_out)
+t_test_21_out$p.value
+
+tuition_md_22_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2022_23_tuitionfee_out`)
+tuition_va_22_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2022_23_tuitionfee_out`)
+t_test_22_out <- t.test(tuition_md_22_out, tuition_va_22_out)
+t_test_22_out$p.value
+
+tuition_md_23_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2023_24_tuitionfee_out`)
+tuition_va_23_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2023_24_tuitionfee_out`)
+t_test_23_out <- t.test(tuition_md_23_out, tuition_va_23_out)
+```
+
+All p-values are much greater than 0.05, which means we fail to reject the null hypothesis for all three years.
+
+The average out-of-state tuition in Maryland and Virginia colleges is about the same for 2021–22, 2022–23, and 2023–24.
+
+There is no statistically significant difference in out of state tuition between the two states in any year.
+
+
+
+ANOVA - MD + VA IN
+```{r}
+tuition_2021 <- md_va_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- md_va_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- md_va_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_va_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+
+ANOVA - VA IN
+```{r}
+va_colleges <- md_va_colleges %>% filter(state == "VA")
+
+tuition_2021 <- va_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- va_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- va_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(va_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+
+ANOVA - MD IN
+```{r}
+md_colleges <- md_va_colleges %>% filter(state == "MD")
+
+tuition_2021 <- md_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- md_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- md_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+
+The ANOVA tests whether average in state tuition changed significantly across the three years from 2021–22 to 2023–24. For Maryland, Virginia, and both states combined, all p-values are much greater than 0.05, which means we fail to reject the null hypothesis. There is no statistically significant change in in state tuition over these years, and tuition has remained relatively stable for both states.
+
+
+ANOVA - MD OUT
+```{r}
+md_colleges_out <- md_va_colleges_out %>% filter(state == "MD")
+
+tuition_2021_out <- md_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- md_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- md_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+
+ANOVA - VA OUT
+```{r}
+va_colleges_out <- md_va_colleges_out %>% filter(state == "VA")
+
+tuition_2021_out <- va_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- va_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- va_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(va_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+
+ANOVA - MD + VA OUT
+```{r}
+tuition_2021_out <- md_va_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- md_va_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- md_va_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_va_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+The ANOVA tests whether average out of state tuition changed significantly across 2021–22, 2022–23, and 2023–24. For Maryland, Virginia, and both states combined, all p-values are much greater than 0.05, meaning we fail to reject the null hypothesis. Out of state tuition has remained relatively stable over these three years, with no statistically significant changes for either state or both states together.
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+bar_df <- md_va_colleges_out %>%
+  select(state, `2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  pivot_longer(
+    cols = starts_with("202"),
+    names_to = "year",
+    values_to = "tuition"
+  ) %>%
+  group_by(state, year) %>%
+  summarize(avg_tuition = mean(tuition, na.rm = TRUE), .groups = "drop")
+
+ggplot(bar_df, aes(x = year, y = avg_tuition, fill = state)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average Out-of-State Tuition by Year",
+    x = "Academic Year",
+    y = "Average Tuition ($)",
+    fill = "State"
+  ) +
+  theme_minimal()
+```
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+bar_df_in <- md_va_colleges %>%
+  select(state, `2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  pivot_longer(
+    cols = starts_with("202"),
+    names_to = "year",
+    values_to = "tuition"
+  ) %>%
+  group_by(state, year) %>%
+  summarize(avg_tuition = mean(tuition, na.rm = TRUE), .groups = "drop")
+
+ggplot(bar_df_in, aes(x = year, y = avg_tuition, fill = state)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average In-State Tuition by Year",
+    x = "Academic Year",
+    y = "Average Tuition ($)",
+    fill = "State"
+  ) +
+  theme_minimal()
+```
