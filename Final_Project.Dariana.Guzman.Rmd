@@ -1,0 +1,336 @@
+---
+title: "Final Project"
+output: html_document
+DARIANA GUZMAN
+---
+
+For this project, I am using the College Scorecard dataset. It is a large dataset from the U.S. Department of Education. It includes information about colleges such as tuition, test scores, graduation rates, and student earnings. I am focusing on tuition costs at colleges in Maryland and Virginia.
+
+#Where the data comes from?#
+
+The data comes from the College Scorecard, which is public information from the federal government.
+
+This project uses the US College Scorecard dataset, accessed through the `collegeScorecard` R package.
+
+Main website: https://collegescorecard.ed.gov/data
+R package used: collegeScorecard
+Package info: https://raw.githubusercontent.com/wellsdata/Jour405_student_repo_fall_2025/refs/heads/main/project/college_scorecard_2021_2024.csv
+
+The package gives me two datasets:
+
+school – information about each college (name, state, type of school, etc)
+scorecard – information for each college for every year (tuition, average costs, test scores, etc)
+
+---
+```{r}
+library(tidyverse)
+
+college_data <- read_csv("https://raw.githubusercontent.com/wellsdata/Jour405_student_repo_fall_2025/refs/heads/main/project/college_scorecard_2021_2024.csv")
+
+glimpse(college_data)
+```
+
+```{r}
+college_data %>%
+  summarize(
+    mean_in_21 = mean(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    median_in_21 = median(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    min_in_21 = min(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    max_in_21 = max(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    sd_in_21 = sd(`2021_22_tuitionfee_in`, na.rm = TRUE),
+    
+    mean_in_22 = mean(`2022_23_tuitionfee_in`, na.rm = TRUE),
+    median_in_22 = median(`2022_23_tuitionfee_in`, na.rm = TRUE),
+    min_in_22 = min(`2022_23_tuitionfee_in`, na.rm = TRUE),
+    max_in_22 = max(`2022_23_tuitionfee_in`, na.rm = TRUE),
+    sd_in_22 = sd(`2022_23_tuitionfee_in`, na.rm = TRUE),
+    
+    mean_in_23 = mean(`2023_24_tuitionfee_in`, na.rm = TRUE),
+    median_in_23 = median(`2023_24_tuitionfee_in`, na.rm = TRUE),
+    min_in_23 = min(`2023_24_tuitionfee_in`, na.rm = TRUE),
+    max_in_23 = max(`2023_24_tuitionfee_in`, na.rm = TRUE),
+    sd_in_23 = sd(`2023_24_tuitionfee_in`, na.rm = TRUE)
+  )
+```
+This shows statistics for in state tuition at Maryland and Virginia colleges from 2021–22 to 2023–24. The average tuition increased slightly each year, from $17,045 in 2021–22 to $17,898 in 2023–24. The median tuition also rose gradually, showing that the typical college saw small increases. The minimum tuition stayed the same at $3,314, while the max tuition went up from $59,380 to $64,525, meaning the most expensive colleges became a bit pricier The standard deviation increased slightly each year, from 13,338 to 14,060, showing that tuition prices became a little more spread out across colleges, with bigger differences between cheaper and more expensive schools.
+
+```{r}
+college_data %>%
+  summarize(
+    mean_out_21 = mean(`2021_22_tuitionfee_out`, na.rm = TRUE),
+    median_out_21 = median(`2021_22_tuitionfee_out`, na.rm = TRUE),
+    min_out_21 = min(`2021_22_tuitionfee_out`, na.rm = TRUE),
+    max_out_21 = max(`2021_22_tuitionfee_out`, na.rm = TRUE),
+    sd_out_21 = sd(`2021_22_tuitionfee_out`, na.rm = TRUE),
+    
+    mean_out_22 = mean(`2022_23_tuitionfee_out`, na.rm = TRUE),
+    median_out_22 = median(`2022_23_tuitionfee_out`, na.rm = TRUE),
+    min_out_22 = min(`2022_23_tuitionfee_out`, na.rm = TRUE),
+    max_out_22 = max(`2022_23_tuitionfee_out`, na.rm = TRUE),
+    sd_out_22 = sd(`2022_23_tuitionfee_out`, na.rm = TRUE),
+    
+    mean_out_23 = mean(`2023_24_tuitionfee_out`, na.rm = TRUE),
+    median_out_23 = median(`2023_24_tuitionfee_out`, na.rm = TRUE),
+    min_out_23 = min(`2023_24_tuitionfee_out`, na.rm = TRUE),
+    max_out_23 = max(`2023_24_tuitionfee_out`, na.rm = TRUE),
+    sd_out_23 = sd(`2023_24_tuitionfee_out`, na.rm = TRUE)
+  )
+```	
+This shows statistics for out of state tuition at Maryland and Virginia colleges from 2021–22 to 2023–24. On average, tuition increased each year, from about $21,073 in 2021–22 to $22,122 in 2023–24. The median tuition also went up slightly, meaning the typical college charged a bit more each year. The minimum tuition increased from $5,400 to $6,660, while the maximum tuition rose from $59,380 to $64,525, so the most expensive schools got more expensive. The standard deviation went up from 12,907 to 13,711, showing that tuition prices became a little more spread out, with bigger differences between cheaper and more expensive colleges.
+
+#Hypotheses#
+
+Hypothesis 1 - MD vs VA tuition - In state:
+
+Null: There is no significant difference in in state tuition between Maryland and Virginia colleges.
+
+Alt: There is a significant difference in in state tuition between Maryland and Virginia colleges.
+
+Hypothesis 2 - MD vs VA tuition - Out of State:
+
+Null: There is no significant difference in out of state tuition between Maryland and Virginia colleges.
+
+Alt: There is a significant difference in out of state tuition between Maryland and Virginia colleges.
+
+#Data filtration#
+```{r}
+md_va_colleges <- college_data %>%
+  filter(state %in% c("MD", "VA")) %>%
+  select(institution, state, 
+         `2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  drop_na(`2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  mutate(
+    tuition_change = `2022_23_tuitionfee_in` - `2021_22_tuitionfee_in`
+  )
+
+md_va_colleges_out <- college_data %>%
+  filter(state %in% c("MD", "VA")) %>%
+  select(institution, state, 
+         `2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  drop_na(`2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  mutate(
+    tuition_change_out = `2022_23_tuitionfee_out` - `2021_22_tuitionfee_out`
+  )
+```
+
+This code filters the dataset for Maryland and Virginia colleges, keeping only the tuition columns for each year, removes any colleges with missing data, and calculates the year to year change in tuition for both in state and out of state students.
+
+#T-Test - In State#
+```{r}
+tuition_md_21 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2021_22_tuitionfee_in`)
+tuition_va_21 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2021_22_tuitionfee_in`)
+t_test_21 <- t.test(tuition_md_21, tuition_va_21)
+
+tuition_md_22 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2022_23_tuitionfee_in`)
+tuition_va_22 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2022_23_tuitionfee_in`)
+t_test_22 <- t.test(tuition_md_22, tuition_va_22)
+
+tuition_md_23 <- md_va_colleges %>% filter(state == "MD") %>% pull(`2023_24_tuitionfee_in`)
+tuition_va_23 <- md_va_colleges %>% filter(state == "VA") %>% pull(`2023_24_tuitionfee_in`)
+t_test_23 <- t.test(tuition_md_23, tuition_va_23)
+```	
+
+All p-values are much greater than 0.05, which means we fail to reject the null hypothesis for all three years.
+
+The average in-state tuition in Maryland and Virginia colleges is about the same for 2021–22, 2022–23, and 2023–24.
+
+There is no statistically significant difference in tuition between the two states in any year.
+
+#T-Test - Out of State#
+```{r}
+tuition_md_21_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2021_22_tuitionfee_out`)
+tuition_va_21_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2021_22_tuitionfee_out`)
+t_test_21_out <- t.test(tuition_md_21_out, tuition_va_21_out)
+t_test_21_out$p.value
+
+tuition_md_22_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2022_23_tuitionfee_out`)
+tuition_va_22_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2022_23_tuitionfee_out`)
+t_test_22_out <- t.test(tuition_md_22_out, tuition_va_22_out)
+t_test_22_out$p.value
+
+tuition_md_23_out <- md_va_colleges_out %>% filter(state == "MD") %>% pull(`2023_24_tuitionfee_out`)
+tuition_va_23_out <- md_va_colleges_out %>% filter(state == "VA") %>% pull(`2023_24_tuitionfee_out`)
+t_test_23_out <- t.test(tuition_md_23_out, tuition_va_23_out)
+```
+All p-values are much greater than 0.05, which means we fail to reject the null hypothesis for all three years.
+
+The average out-of-state tuition in Maryland and Virginia colleges is about the same for 2021–22, 2022–23, and 2023–24.
+
+There is no statistically significant difference in out of state tuition between the two states in any year.
+
+#ANOVA - MD + VA IN STATE#
+```{r}
+tuition_2021 <- md_va_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- md_va_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- md_va_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_va_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+#ANOVA - VA IN STATE#
+```{r}
+va_colleges <- md_va_colleges %>% filter(state == "VA")
+
+tuition_2021 <- va_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- va_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- va_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(va_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+
+#ANOVA - MD IN STATE#
+```{r}
+md_colleges <- md_va_colleges %>% filter(state == "MD")
+
+tuition_2021 <- md_colleges$`2021_22_tuitionfee_in`
+tuition_2022 <- md_colleges$`2022_23_tuitionfee_in`
+tuition_2023 <- md_colleges$`2023_24_tuitionfee_in`
+
+anova_df <- data.frame(
+  tuition = c(tuition_2021, tuition_2022, tuition_2023),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_colleges)))
+)
+
+anova_result <- aov(tuition ~ year, data = anova_df)
+summary(anova_result)
+```
+
+The ANOVA tests whether average in state tuition changed significantly across the three years from 2021–22 to 2023–24. For Maryland, Virginia, and both states combined, all p-values are much greater than 0.05, which means we fail to reject the null hypothesis. There is no statistically significant change in in state tuition over these years, and tuition has remained relatively stable for both states.
+
+#ANOVA - MD OUT OF STATE#
+```{r}
+md_colleges_out <- md_va_colleges_out %>% filter(state == "MD")
+
+tuition_2021_out <- md_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- md_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- md_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+#ANOVA - VA OUT OF STATE#
+```{r}
+va_colleges_out <- md_va_colleges_out %>% filter(state == "VA")
+
+tuition_2021_out <- va_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- va_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- va_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(va_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+#ANOVA - MD + VA OUT OF STATE#
+```{r}
+tuition_2021_out <- md_va_colleges_out$`2021_22_tuitionfee_out`
+tuition_2022_out <- md_va_colleges_out$`2022_23_tuitionfee_out`
+tuition_2023_out <- md_va_colleges_out$`2023_24_tuitionfee_out`
+
+anova_df_out <- data.frame(
+  tuition = c(tuition_2021_out, tuition_2022_out, tuition_2023_out),
+  year = factor(rep(c("2021_22", "2022_23", "2023_24"), each = nrow(md_va_colleges_out)))
+)
+
+anova_result_out <- aov(tuition ~ year, data = anova_df_out)
+summary(anova_result_out)
+```
+
+The ANOVA tests whether average out of state tuition changed significantly across 2021–22, 2022–23, and 2023–24. For Maryland, Virginia, and both states combined, all p-values are much greater than 0.05, meaning we fail to reject the null hypothesis. Out of state tuition has remained relatively stable over these three years, with no statistically significant changes for either state or both states together.
+
+#OUT OF STATE TUITION - BAR GRAPH#
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+bar_df <- md_va_colleges_out %>%
+  select(state, `2021_22_tuitionfee_out`, `2022_23_tuitionfee_out`, `2023_24_tuitionfee_out`) %>%
+  pivot_longer(
+    cols = starts_with("202"),
+    names_to = "year",
+    values_to = "tuition"
+  ) %>%
+  group_by(state, year) %>%
+  summarize(avg_tuition = mean(tuition, na.rm = TRUE), .groups = "drop")
+
+ggplot(bar_df, aes(x = year, y = avg_tuition, fill = state)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average Out-of-State Tuition by Year",
+    x = "Academic Year",
+    y = "Average Tuition ($)",
+    fill = "State"
+  ) +
+  theme_minimal()
+```
+The out of state tuition graph shows the average tuition for Maryland and Virginia colleges for the same years. Out of state tuition is higher than in state tuition, but the bars for the two states are almost the same, meaning the costs are similar. The bars don’t change much from year to year, which shows that out of state tuition has stayed pretty steady. This fits with the tests, which showed no significant differences between the states or across the years.
+
+#IN STATE TUITION - BAR GRAPH#
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+bar_df_in <- md_va_colleges %>%
+  select(state, `2021_22_tuitionfee_in`, `2022_23_tuitionfee_in`, `2023_24_tuitionfee_in`) %>%
+  pivot_longer(
+    cols = starts_with("202"),
+    names_to = "year",
+    values_to = "tuition"
+  ) %>%
+  group_by(state, year) %>%
+  summarize(avg_tuition = mean(tuition, na.rm = TRUE), .groups = "drop")
+
+ggplot(bar_df_in, aes(x = year, y = avg_tuition, fill = state)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Average In-State Tuition by Year",
+    x = "Academic Year",
+    y = "Average Tuition ($)",
+    fill = "State"
+  ) +
+  theme_minimal()
+```
+The in state tuition graph shows the average tuition for colleges in Maryland and Virginia from 2021–22 to 2023–24. The bars for both states look very similar each year, which means in state tuition is about the same in Maryland and Virginia. The heights of the bars don’t change much over the years, showing that tuition has stayed mostly the same. This matches the statistics, which also found no big differences between the states or years.
+
+
+#Hypothesis results#
+
+In State Tuition (MD vs VA):
+
+I tested whether in-state tuition at Maryland colleges is different from Virginia colleges. The t-tests for all three years showed no significant difference (all p values > 0.05), which means the average tuition is about the same in both states. This tells us that students paying in state tuition in Maryland or Virginia are to face similar costs, and the idea that one state might be more expensive than the other was not supported.
+
+Out of State Tuition (MD vs VA):
+
+I also tested whether out of state tuition at Maryland colleges is different from Virginia colleges. The t-tests again showed no significant differences for any year (all p values > 0.05). This means that out of state students in Maryland or Virginia colleges generally pay similar tuition. The hypothesis that there would be a difference between the two states was not supported, and tuition trends appear very similar.
+
+#Draft story pitch#
+
+My analysis shows that both in state and out of state tuition at colleges in Maryland and Virginia remained relatively the same and steady from 2021–22 through 2023–24. T-tests comparing the two states revealed no statistically significant differences in tuition for any year while ANOVA tests showed no significant changes in tuition over time within each state or when combined. So, tuition prices did not spike or drop noticeably during these years, and Maryland and Virginia colleges follow very similar trends.
+
+There are a few limitations in this analysis. Some tuition data was missing for certain colleges and years -- reducing the sample size. The data set does not adjust for inflation either, so small increases in tuition doesn't reflect real changes in cost. We also do not have data on program specific tuition, fees or the reasons behind tuition changes -- which limits the depth of the story.
+
+The story could focus on affordability trends for students and families in Maryland and Virginia. I would reach out to high education professionals, college financial offices and student advocacy groups for interviews to add context. The charts or visualizations showing stable tuition can be used in the story to illustrate the findings clearly. Also, additional reporting could include comparisons to national tuition trends, as well as potential future changes in state or college policies that might affect tuition.
+
